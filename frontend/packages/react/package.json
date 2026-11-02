@@ -1,0 +1,9 @@
+{
+  "name": "@uncrud/react", "version": "0.1.0", "private": true,
+  "type": "module", "license": "Apache-2.0", "files": ["dist"],
+  "repository": { "type": "git", "url": "https://github.com/vinz486/uncrud.git", "directory": "frontend/packages/react" },
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "dependencies": { "@uncrud/client": "0.1.0" },
+  "peerDependencies": { "react": "^19.3.1" }
+}

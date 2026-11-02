@@ -1,0 +1,9 @@
+{
+  "name": "@uncrud/starter", "version": "0.1.0", "private": true,
+  "type": "module", "license": "Apache-2.0",
+  "scripts": { "dev": "vite --host 127.0.0.1 --port 5174 --strictPort", "build": "tsc --noEmit && vite build" },
+  "dependencies": {
+    "@uncrud/client": "0.1.0", "@uncrud/react": "0.1.0",
+    "firebase": "13.1.0", "react": "19.3.1", "react-dom": "19.3.1"
+  }
+}

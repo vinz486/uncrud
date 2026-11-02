@@ -1,0 +1,12 @@
+{
+  "name": "@uncrud/client", "version": "0.1.0", "private": true,
+  "type": "module", "license": "Apache-2.0", "files": ["dist"],
+  "repository": { "type": "git", "url": "https://github.com/vinz486/uncrud.git", "directory": "frontend/packages/client" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./firebase": { "types": "./dist/firebase.d.ts", "import": "./dist/firebase.js" }
+  },
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "peerDependencies": { "firebase": "^13.1.0" },
+  "peerDependenciesMeta": { "firebase": { "optional": true } }
+}

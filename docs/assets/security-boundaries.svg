@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="460" viewBox="0 0 1100 460" role="img" aria-labelledby="title desc">
+  <title id="title">UnCRUD security boundaries</title><desc id="desc">The browser is untrusted. Commands require Firebase ID tokens and server authorization. Rules allow scoped read-model reads and deny writes/private reads. The server accesses private data through IAM, bypassing Rules.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#4d785e"/></marker></defs>
+  <rect width="1100" height="460" rx="20" fill="#f3f5ed"/>
+  <g font-family="system-ui,sans-serif" fill="#183d31"><text x="36" y="44" font-size="12" letter-spacing="2">UNCRUD / TRUST BOUNDARIES</text><text x="36" y="80" font-size="26" font-weight="600">Identity is verified. Access is explicit.</text>
+    <rect x="36" y="130" width="238" height="261" rx="14" fill="#fff" stroke="#cedac8"/><text x="58" y="165" font-size="19" font-weight="600">Browser</text><text x="58" y="193" font-size="12">Untrusted request input</text><text x="58" y="218" font-size="12">Firebase user ID token</text><text x="58" y="243" font-size="12">Read-only subscriptions</text><text x="58" y="370" font-size="11" fill="#9a5245">No service-account credentials</text>
+    <rect x="409" y="130" width="280" height="118" rx="14" fill="#1b5140"/><g fill="#f1f7e8"><text x="431" y="165" font-size="19" font-weight="600">Application backend</text><text x="431" y="192" font-size="12">Verify Firebase token + domain policy</text><text x="431" y="216" font-size="12">Runtime service account / ADC</text></g>
+    <rect x="830" y="130" width="234" height="118" rx="14" fill="#e5e9df" stroke="#b9c9b1"/><text x="852" y="165" font-size="19" font-weight="600">Private state</text><text x="852" y="193" font-size="12">Server access through IAM</text><text x="852" y="217" font-size="12">Admin SDK bypasses Rules</text>
+    <rect x="409" y="288" width="280" height="103" rx="14" fill="#d6edaa" stroke="#a9c97c"/><text x="431" y="323" font-size="19" font-weight="600">Firestore Security Rules</text><text x="431" y="350" font-size="12">Shared authenticated / own-user reads</text><text x="431" y="374" font-size="12">All client writes denied</text>
+    <rect x="830" y="288" width="234" height="103" rx="14" fill="#fff" stroke="#cedac8"/><text x="852" y="323" font-size="19" font-weight="600">Read model</text><text x="852" y="350" font-size="12">Minimal display documents</text><text x="852" y="374" font-size="12">No private fields mixed in</text>
+    <g fill="none" stroke="#4d785e" stroke-width="2" marker-end="url(#arrow)"><path d="M274 186H401"/><path d="M689 186H822"/><path d="M274 337H401"/><path d="M689 337H822"/></g>
+    <text x="296" y="173" font-size="11">commands</text><text x="718" y="173" font-size="11">IAM</text><text x="307" y="324" font-size="11">reads</text><text x="721" y="324" font-size="11">scoped</text>
+    <text x="36" y="433" font-size="11" fill="#71826b">Developer CLI credentials, application ADC and end-user Firebase Auth serve different purposes.</text>
+  </g>
+</svg>

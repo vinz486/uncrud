@@ -1,0 +1,21 @@
+plugins { id 'org.springframework.boot' }
+
+dependencies {
+    implementation project(':backend:uncrud-spring-boot')
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'com.google.firebase:firebase-admin:9.11.0'
+}
+
+tasks.register('integrationTest', Test) {
+    group = 'verification'
+    description = 'Firestore emulator integration tests (explicit opt-in).'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'emulator' }
+}
+tasks.named('test') { useJUnitPlatform { excludeTags 'emulator' } }
+tasks.register('reconcile', JavaExec) {
+    group = 'application'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'uncrud.poll.Reconcile'
+}

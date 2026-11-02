@@ -1,0 +1,10 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "pollViews", "fieldPath": "counts", "indexes": [] },
+    { "collectionGroup": "pollViews", "fieldPath": "options", "indexes": [] },
+    { "collectionGroup": "privatePolls", "fieldPath": "counts", "indexes": [] },
+    { "collectionGroup": "privatePolls", "fieldPath": "options", "indexes": [] },
+    { "collectionGroup": "receipts", "fieldPath": "receipt", "indexes": [] }
+  ]
+}

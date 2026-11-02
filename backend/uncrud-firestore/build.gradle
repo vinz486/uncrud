@@ -1,0 +1,6 @@
+dependencies {
+    api project(':backend:uncrud-core')
+    api 'com.google.cloud:google-cloud-firestore:3.47.0'
+    implementation platform('org.springframework.boot:spring-boot-dependencies:4.1.2')
+    implementation 'tools.jackson.core:jackson-databind'
+}

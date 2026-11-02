@@ -1,0 +1,6 @@
+**
+!starter/
+!starter/backend/
+!starter/backend/build/
+!starter/backend/build/libs/
+!starter/backend/build/libs/backend-0.1.0-SNAPSHOT.jar

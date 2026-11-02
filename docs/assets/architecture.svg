@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420" role="img" aria-labelledby="title desc">
+  <title id="title">UnCRUD architecture: commands in, realtime projections out</title>
+  <desc id="desc">React sends an authenticated HTTP command to Java. Private state and safe projections commit in one Firestore transaction. A read-only realtime subscription updates React.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#4d785e"/></marker></defs>
+  <rect width="1100" height="420" rx="20" fill="#f3f5ed"/>
+  <g font-family="system-ui,sans-serif" fill="#183d31">
+    <text x="36" y="47" font-size="12" letter-spacing="2">UNCRUD / DATA FLOW</text>
+    <text x="36" y="84" font-size="27" font-weight="600">One command. One commit. Every screen.</text>
+    <rect x="570" y="113" width="490" height="165" rx="16" fill="#e6eddb" stroke="#96ae8d" stroke-dasharray="6 5"/>
+    <text x="592" y="140" font-size="11" letter-spacing="1.5">ATOMIC FIRESTORE TRANSACTION</text>
+    <rect x="36" y="160" width="200" height="112" rx="12" fill="#fff" stroke="#cedac8"/>
+    <text x="56" y="193" font-size="19" font-weight="600">React client</text><text x="56" y="219" font-size="12">Firebase Auth identity</text><text x="56" y="240" font-size="12">Headless projection hooks</text>
+    <rect x="314" y="160" width="200" height="112" rx="12" fill="#1b5140"/>
+    <g fill="#eff7e7"><text x="334" y="193" font-size="19" font-weight="600">Java backend</text><text x="334" y="219" font-size="12">Verify identity + permissions</text><text x="334" y="240" font-size="12">Apply domain intention</text></g>
+    <rect x="592" y="160" width="200" height="94" rx="12" fill="#fff" stroke="#cedac8"/><text x="612" y="191" font-size="17" font-weight="600">Private state</text><text x="612" y="216" font-size="12">Source + vote + receipt</text><text x="612" y="236" font-size="11" fill="#698267">Server IAM only</text>
+    <rect x="827" y="160" width="211" height="94" rx="12" fill="#d6edaa" stroke="#a9c97c"/><text x="847" y="191" font-size="17" font-weight="600">Read model</text><text x="847" y="216" font-size="12">Minimal, safe, versioned DTO</text><text x="847" y="236" font-size="11" fill="#698267">Client reads governed by Rules</text>
+    <g stroke="#4d785e" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M236 207H306"/><path d="M514 207H584"/><path d="M792 207H819"/><path d="M932 255V320Q932 335 916 335H152Q136 335 136 319V280"/></g>
+    <text x="249" y="181" font-size="10">HTTP</text><text x="527" y="181" font-size="10">write</text><text x="400" y="358" font-size="12" fill="#4d785e">Read-only realtime snapshots · no API polling · no client writes</text>
+    <text x="36" y="392" font-size="11" fill="#71826b">Persistence is atomic. Snapshot delivery to each client is asynchronous.</text>
+  </g>
+</svg>

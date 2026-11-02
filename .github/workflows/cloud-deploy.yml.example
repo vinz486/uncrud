@@ -1,0 +1,100 @@
+# Inert template: review IDs, permissions and environment protection before renaming to .yml.
+name: Authorized cloud deployment
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [dev, prod]
+        required: true
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  deploy:
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify
+      - name: Validate explicitly configured environment
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          SERVICE: ${{ vars.GCP_RUN_SERVICE }}
+          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+          RUNTIME_ACCOUNT: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+        run: |
+          test -n "$PROJECT_ID" && test -n "$REGION" && test -n "$SERVICE"
+          test -n "$REPOSITORY" && test -n "$RUNTIME_ACCOUNT"
+          node scripts/prepare-hosting.mjs --project="$PROJECT_ID" --region="$REGION" --service="$SERVICE" --dry-run
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Build, push and deploy approved backend
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          SERVICE: ${{ vars.GCP_RUN_SERVICE }}
+          REPOSITORY: ${{ vars.GCP_ARTIFACT_REPOSITORY }}
+          RUNTIME_ACCOUNT: ${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+          APP_ENV: ${{ inputs.environment }}
+          DATABASE_ID: ${{ vars.FIRESTORE_DATABASE_ID }}
+          ALLOWED_ORIGIN: ${{ vars.HOSTING_ORIGIN }}
+        run: |
+          test -n "$DATABASE_ID" && test -n "$ALLOWED_ORIGIN"
+          image="$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/api:$GITHUB_SHA"
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -f deploy/cloud-run/Dockerfile -t "$image" .
+          docker push "$image"
+          digest=$(gcloud artifacts docker images describe "$image" --project="$PROJECT_ID" --format='value(image_summary.digest)')
+          test -n "$digest"
+          IMAGE_DIGEST="${image%:*}@$digest"
+          export IMAGE_DIGEST
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; const e=process.env; writeFileSync(".local/cloud-env.json",JSON.stringify({UNCRUD_ENV:e.APP_ENV,UNCRUD_PROJECT_ID:e.PROJECT_ID,UNCRUD_DATABASE_ID:e.DATABASE_ID,UNCRUD_ALLOWED_ORIGINS:e.ALLOWED_ORIGIN}));'
+          gcloud run deploy "$SERVICE" --project="$PROJECT_ID" --region="$REGION" \
+            --image="$IMAGE_DIGEST" --service-account="$RUNTIME_ACCOUNT" \
+            --env-vars-file=.local/cloud-env.json --port=8080 --memory=768Mi --cpu=1 \
+            --min=0 --max=2 --concurrency=40 --timeout=60 --no-invoker-iam-check \
+            --startup-probe='httpGet.path=/api/v1/health,httpGet.port=8080,periodSeconds=5,timeoutSeconds=2,failureThreshold=20' --quiet
+      - name: Build and deploy approved Hosting site
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          SERVICE: ${{ vars.GCP_RUN_SERVICE }}
+          HOSTING_SITE: ${{ vars.FIREBASE_HOSTING_SITE }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          VITE_FIREBASE_API_KEY: ${{ vars.FIREBASE_WEB_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_APP_ID: ${{ vars.FIREBASE_WEB_APP_ID }}
+          VITE_FIRESTORE_DATABASE_ID: ${{ vars.FIRESTORE_DATABASE_ID }}
+        run: |
+          test -n "$HOSTING_SITE" && test -n "$VITE_FIREBASE_API_KEY" && test -n "$VITE_FIREBASE_APP_ID"
+          npm run build
+          node scripts/prepare-hosting.mjs --project="$PROJECT_ID" --region="$REGION" --service="$SERVICE"
+          node --input-type=module -e 'import {readFileSync,writeFileSync} from "node:fs"; const p=".local/hosting.json",c=JSON.parse(readFileSync(p));c.hosting.site=process.env.HOSTING_SITE;writeFileSync(p,JSON.stringify(c));'
+          npx firebase deploy --only hosting --project="$PROJECT_ID" --config=.local/hosting.json --non-interactive
+      - name: Verify health and protected command rejection
+        env:
+          HOSTING_ORIGIN: ${{ vars.HOSTING_ORIGIN }}
+        run: |
+          curl --fail --silent --show-error "$HOSTING_ORIGIN/api/v1/health"
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            -X POST "$HOSTING_ORIGIN/api/v1/polls/weekend/vote" \
+            -H 'Content-Type: application/json' -H 'Idempotency-Key: deployment-check' \
+            -d '{"optionId":"books","expectedVoteVersion":0}')
+          test "$status" = 401

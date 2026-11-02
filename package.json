@@ -1,0 +1,36 @@
+{
+  "name": "uncrud-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": { "node": ">=24.14.0 <25" },
+  "workspaces": ["frontend/packages/*", "starter/frontend"],
+  "scripts": {
+    "build": "npm run build -w @uncrud/client && npm run build -w @uncrud/react && npm run build -w @uncrud/starter",
+    "dev": "node scripts/local.mjs dev",
+    "test:unit": "tsc -p tests/tsconfig.json && vitest run && ./gradlew test --console=plain",
+    "test:integration": "node scripts/local.mjs integration",
+    "test:e2e": "node scripts/local.mjs e2e",
+    "test:rules": "node --test tests/rules.test.mjs",
+    "skills:check": "node scripts/validate.mjs",
+    "verify": "node scripts/local.mjs verify"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "@playwright/test": "1.64.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "firebase": "13.1.0",
+    "firebase-admin": "13.6.0",
+    "firebase-tools": "15.34.2",
+    "jsdom": "27.2.0",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "4.0.18",
+    "yaml": "2.8.2"
+  }
+}

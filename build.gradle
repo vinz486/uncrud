@@ -1,0 +1,60 @@
+plugins {
+    id 'org.springframework.boot' version '4.1.2' apply false
+}
+
+subprojects {
+
+    if (path == ':backend' || path == ':starter') {
+        return
+    }
+
+    apply plugin: 'java-library'
+    group = 'local.uncrud'
+    version = '0.1.0-SNAPSHOT'
+
+    repositories { mavenCentral() }
+    java {
+        toolchain { languageVersion = JavaLanguageVersion.of(25) }
+        withSourcesJar()
+        withJavadocJar()
+    }
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.13.4')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+        testLogging { events 'failed', 'skipped' }
+    }
+    tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+    tasks.withType(Javadoc).configureEach { options.addBooleanOption('Xdoclint:none', true) }
+
+    tasks.named('jar') { from(rootProject.file('LICENSE')) { into 'META-INF' } }
+    if (path.startsWith(':backend:')) {
+        apply plugin: 'maven-publish'
+        publishing {
+            publications {
+                library(MavenPublication) {
+                    from components.java
+                    pom {
+                        name = project.name
+                        description = 'Explicit commands and atomic realtime read models for Java applications'
+                        url = 'https://github.com/vinz486/uncrud'
+                        licenses {
+                            license {
+                                name = 'Apache License, Version 2.0'
+                                url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                            }
+                        }
+                        scm {
+                            url = 'https://github.com/vinz486/uncrud'
+                            connection = 'scm:git:https://github.com/vinz486/uncrud.git'
+                        }
+                    }
+                }
+            }
+            // No publication repository: namespace and release authorization are still required.
+        }
+    }
+}

@@ -1,0 +1,9 @@
+// Deliberately no runtime dependencies.
+tasks.register('checkRuntimeIndependence') {
+    doLast {
+        if (!configurations.runtimeClasspath.files.empty) {
+            throw new GradleException('uncrud-core must have no runtime dependencies')
+        }
+    }
+}
+tasks.named('check') { dependsOn 'checkRuntimeIndependence' }

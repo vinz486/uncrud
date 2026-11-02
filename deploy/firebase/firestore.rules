@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Backend-owned bounded poll display: labels, counts and projection metadata; no voter identities.
+    match /pollViews/{pollId} {
+      allow get: if request.auth != null;
+      allow list: if request.auth != null && request.query.limit != null && request.query.limit <= 100;
+    }
+    // Personal display: chosen option + metadata, readable only by its Firebase UID.
+    match /userPollViews/{uid}/polls/{pollId} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list: if request.auth != null && request.auth.uid == uid
+        && request.query.limit != null && request.query.limit <= 100;
+    }
+    // privatePolls, votes, command receipts, unknown paths and EVERY client mutation are denied.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
